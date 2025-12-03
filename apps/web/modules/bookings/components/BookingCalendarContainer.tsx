@@ -18,6 +18,7 @@ import { Icon } from "@calcom/ui/components/icon";
 import { useBookingCalendarData } from "~/bookings/hooks/useBookingCalendarData";
 import { useBookingFilters } from "~/bookings/hooks/useBookingFilters";
 import { useCalendarAllowedFilters } from "~/bookings/hooks/useCalendarAllowedFilters";
+import { useCalendarNavigationCapabilities } from "~/bookings/hooks/useCalendarNavigationCapabilities";
 import { useCurrentWeekStart } from "~/bookings/hooks/useCurrentWeekStart";
 import { useFacetedUniqueValues } from "~/bookings/hooks/useFacetedUniqueValues";
 
@@ -162,7 +163,7 @@ function BookingCalendarInner({
 export function BookingCalendarContainer(props: BookingCalendarContainerProps) {
   const { canReadOthersBookings } = props.permissions;
   const { userIds } = useBookingFilters();
-  const { currentWeekStart } = useCurrentWeekStart();
+  const { currentWeekStart, setCurrentWeekStart } = useCurrentWeekStart();
   const [activeFilters, setActiveFilters] = useQueryState("activeFilters", activeFiltersParser);
 
   const allowedFilterIds = useCalendarAllowedFilters({
@@ -215,8 +216,14 @@ export function BookingCalendarContainer(props: BookingCalendarContainerProps) {
 
   const bookings = useMemo(() => data?.bookings ?? [], [data?.bookings]);
 
+  // Create navigation capabilities for calendar view
+  const capabilities = useCalendarNavigationCapabilities({
+    currentWeekStart,
+    setCurrentWeekStart,
+  });
+
   return (
-    <BookingDetailsSheetStoreProvider bookings={bookings}>
+    <BookingDetailsSheetStoreProvider bookings={bookings} capabilities={capabilities}>
       <BookingCalendarInner
         {...props}
         data={data}
